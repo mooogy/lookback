@@ -30,11 +30,11 @@ class CsvDataParser {
 
     auto comma = line.find(',');
     ohlcv.date_ = std::string(line.begin(), line.begin() + comma);
-    auto res = std::from_chars(line.data() + comma, line.end(), ohlcv.open_);
-    res = std::from_chars(res.ptr, line.end(), ohlcv.high_);
-    res = std::from_chars(res.ptr, line.end(), ohlcv.low_);
-    res = std::from_chars(res.ptr, line.end(), ohlcv.close_);
-    res = std::from_chars(res.ptr, line.end(), ohlcv.volume_);
+    auto res = std::from_chars(line.data() + comma + 1, line.end(), ohlcv.open_);
+    res = std::from_chars(res.ptr + 1, line.end(), ohlcv.high_);
+    res = std::from_chars(res.ptr + 1, line.end(), ohlcv.low_);
+    res = std::from_chars(res.ptr + 1, line.end(), ohlcv.close_);
+    res = std::from_chars(res.ptr + 1, line.end(), ohlcv.volume_);
 
     return ohlcv;
   }

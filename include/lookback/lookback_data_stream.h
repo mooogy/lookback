@@ -4,6 +4,7 @@
 #include <ios>
 #include <string>
 #include <fstream>
+#include <iostream>
 #include <vector>
 
 #include "lookback_data_parser.h"
@@ -13,8 +14,8 @@ namespace lookback {
 template<DataStreamParser Parser = CsvDataParser, int MaxBatchSize = 128>
 class DataStream {
  public:
-  DataStream(std::string filename) : file_(filename) {
-    if (!file_.is_open()) throw std::ios_base::failure("Failed to open file: " + filename);
+  DataStream(const std::string filename) : filename_(filename), file_(filename) {
+    if (!file_.is_open()) throw std::ios_base::failure("Failed to open file: " + filename_);
     rawDataBuffer_.reserve(MaxBatchSize);
     processedDataBatch_.reserve(MaxBatchSize);
     processedDataBuffer_.reserve(MaxBatchSize);
@@ -25,8 +26,15 @@ class DataStream {
   void loadDataBatch() {
     fillRawDataBuffer();
     
+    unsigned long long int lineNumber = 0;
     for (const std::string_view line : rawDataBuffer_) {
-      processedDataBuffer_.emplace_back(parser_.processLine(line));
+      ++lineNumber;
+      try {
+          processedDataBuffer_.emplace_back(parser_.processLine(line));
+      } catch (const std::exception& e) {
+          std::cerr << "[Warning] " << filename_ << 
+          ": Skipping malformed data at line " << lineNumber << "\n";
+      }
     }
   }
 
@@ -46,6 +54,7 @@ class DataStream {
   }
 
   Parser parser_;
+  std::string filename_;
   std::ifstream file_;
   std::vector<std::string> rawDataBuffer_;
   std::vector<OpenHighLowCloseVolume> processedDataBatch_;
