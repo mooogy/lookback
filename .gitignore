@@ -1,0 +1,5 @@
+.clangd
+.cache
+build
+main.cpp
+data.csv
