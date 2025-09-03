@@ -26,21 +26,17 @@ class DataStream {
   void loadDataBatch() {
     fillRawDataBuffer();
     
-    unsigned long long int lineNumber = 0;
     for (const std::string_view line : rawDataBuffer_) {
-      ++lineNumber;
-      try {
-          processedDataBuffer_.emplace_back(parser_.processLine(line));
-      } catch (const std::exception& e) {
-          std::cerr << "[Warning] " << filename_ << 
-          ": Skipping malformed data at line " << lineNumber << "\n";
-      }
+      processedDataBuffer_.emplace_back(parser_.processLine(line));
     }
   }
 
   void switchCurrentBatch() {
+    processedDataBatch_.clear();
     processedDataBuffer_.swap(processedDataBatch_);
   }
+
+  bool empty() const { return file_.eof(); }
 
  private:
   void fillRawDataBuffer() {
