@@ -11,10 +11,17 @@
 
 namespace lookback {
 
+template <typename T>
+concept DataStream = requires(T stream) {
+  { stream.prepareNextBatch() } -> std::same_as<void>;
+  { stream.commitNextBatch() } -> std::same_as<void>;
+  { stream.getCurrentBatch() } -> std::same_as<const std::vector<OpenHighLowCloseVolume>&>;
+};
+
 template<DataStreamParser Parser = CsvDataParser, int MaxBatchSize = 128>
-class DataStream {
+class BasicDataStream {
  public:
-  DataStream(const std::string filename) : filename_(filename), file_(filename) {
+  BasicDataStream(const std::string filename) : filename_(filename), file_(filename) {
     if (!file_.is_open()) throw std::ios_base::failure("Failed to open file: " + filename_);
     rawDataBuffer_.reserve(MaxBatchSize);
     processedDataBatch_.reserve(MaxBatchSize);
@@ -23,7 +30,7 @@ class DataStream {
 
   const std::vector<OpenHighLowCloseVolume>& getCurrentBatch() const { return processedDataBatch_; }
 
-  void loadDataBatch() {
+  void prepareNextBatch() {
     fillRawDataBuffer();
     
     for (const std::string_view line : rawDataBuffer_) {
@@ -31,7 +38,7 @@ class DataStream {
     }
   }
 
-  void switchCurrentBatch() {
+  void commitNextBatch() {
     processedDataBatch_.clear();
     processedDataBuffer_.swap(processedDataBatch_);
   }
