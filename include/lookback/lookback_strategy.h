@@ -8,8 +8,8 @@
 namespace lookback {
 
 enum class OrderType {
-  BUY,
-  SELL,
+  LONG,
+  SHORT,
   CLOSE
 };
 
@@ -17,12 +17,11 @@ struct Order {
   Date date_;
   OrderType type_;
   std::optional<Volume> quantity_;
-  std::optional<Price> entryPrice_;
 };
 
 template <typename T>
-concept TradingStrategy = requires(T a, OpenHighLowCloseVolume& ohlc) {
-  { a.processOpenHighLowClose(ohlc) } -> std::same_as<std::optional<Order>>;
+concept TradingStrategy = requires(T a, const Bar& ohlc, Price bal) {
+  { a.processBar(ohlc, bal) } -> std::same_as<std::optional<Order>>;
 };
 
 class SMA30 {
@@ -33,7 +32,7 @@ class SMA30 {
     closePoints_.resize(periodTimeframe);
   }
 
-  std::optional<Order> processOpenHighLowClose(const OpenHighLowCloseVolume& ohlc) {
+  std::optional<Order> processBar(const Bar& ohlc, Price bal) {
     Price previousDayClose;
     if (!closePoints_.empty()) previousDayClose = closePoints_.front();
 
@@ -51,12 +50,12 @@ class SMA30 {
 
     if (!isLong_ && ohlc.close_ > sma30) {
       isLong_ = true;
-      return std::make_optional<Order>(ohlc.date_, OrderType::BUY, 100 ,ohlc.close_);
+      return std::make_optional<Order>(ohlc.date_, OrderType::LONG, 100);
     }
 
     if (!isShort_ && ohlc.close_ < sma30) {
       isShort_ = true;
-      return std::make_optional<Order>(ohlc.date_, OrderType::SELL, 100 ,ohlc.close_);
+      return std::make_optional<Order>(ohlc.date_, OrderType::SHORT, 100);
     }
 
     if (isLong_ && ohlc.close_ < previousDayClose) {

@@ -15,7 +15,8 @@ template <typename T>
 concept DataStream = requires(T stream) {
   { stream.prepareNextBatch() } -> std::same_as<void>;
   { stream.commitNextBatch() } -> std::same_as<void>;
-  { stream.getCurrentBatch() } -> std::same_as<const std::vector<OpenHighLowCloseVolume>&>;
+  { stream.getCurrentBatch() } -> std::same_as<const std::vector<Bar>&>;
+  { stream.empty() } -> std::same_as<bool>;
 };
 
 template<DataStreamParser Parser = CsvDataParser, int MaxBatchSize = 128>
@@ -28,7 +29,7 @@ class BasicDataStream {
     processedDataBuffer_.reserve(MaxBatchSize);
   }
 
-  const std::vector<OpenHighLowCloseVolume>& getCurrentBatch() const { return processedDataBatch_; }
+  const std::vector<Bar>& getCurrentBatch() const { return processedDataBatch_; }
 
   void prepareNextBatch() {
     fillRawDataBuffer();
@@ -60,8 +61,8 @@ class BasicDataStream {
   std::string filename_;
   std::ifstream file_;
   std::vector<std::string> rawDataBuffer_;
-  std::vector<OpenHighLowCloseVolume> processedDataBatch_;
-  std::vector<OpenHighLowCloseVolume> processedDataBuffer_;
+  std::vector<Bar> processedDataBatch_;
+  std::vector<Bar> processedDataBuffer_;
 };
 } // namespace: lookback
 

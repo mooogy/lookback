@@ -9,7 +9,7 @@ using Date = std::string;
 using Price = double;
 using Volume = unsigned int;
 
-struct OpenHighLowCloseVolume {
+struct Bar {
   Date date_;
   Price open_;
   Price high_;
@@ -20,13 +20,13 @@ struct OpenHighLowCloseVolume {
 
 template <typename T>
 concept DataStreamParser = requires(T parser, const std::string_view line) {
-   { parser.processLine(line) } -> std::same_as<OpenHighLowCloseVolume>;
+   { parser.processLine(line) } -> std::same_as<Bar>;
 };
 
 class CsvDataParser {
   public:
-  OpenHighLowCloseVolume processLine(const std::string_view line) {
-    OpenHighLowCloseVolume ohlcv;
+  Bar processLine(const std::string_view line) {
+    Bar ohlcv;
 
     auto comma = line.find(',');
     ohlcv.date_ = std::string(line.begin(), line.begin() + comma);
