@@ -1,69 +1,79 @@
-#ifndef LOOKBACK_INCLUDE_LOOKBACK_LOOKBACK_DATA_STREAM_H_
-#define LOOKBACK_INCLUDE_LOOKBACK_LOOKBACK_DATA_STREAM_H_
-
-#include <ios>
-#include <string>
-#include <fstream>
-#include <iostream>
-#include <vector>
+#pragma once
 
 #include "lookback_data_parser.h"
+#include <filesystem>
+#include <fstream>
+#include <stdexcept>
+#include <string>
+
+namespace fs = std::filesystem;
 
 namespace lookback {
 
-template <typename T>
-concept DataStream = requires(T stream) {
-  { stream.prepareNextBatch() } -> std::same_as<void>;
-  { stream.commitNextBatch() } -> std::same_as<void>;
-  { stream.getCurrentBatch() } -> std::same_as<const std::vector<Bar>&>;
-  { stream.empty() } -> std::same_as<bool>;
+template <size_t N>
+struct FilePathLiteral {
+  consteval FilePathLiteral(const char (&str)[N]) {
+    std::copy_n(str, N, value);
+  }
+
+  char value[N];
 };
 
-template<DataStreamParser Parser = CsvDataParser, int MaxBatchSize = 128>
-class BasicDataStream {
- public:
-  BasicDataStream(const std::string filename) : filename_(filename), file_(filename) {
-    if (!file_.is_open()) throw std::ios_base::failure("Failed to open file: " + filename_);
-    rawDataBuffer_.reserve(MaxBatchSize);
-    processedDataBatch_.reserve(MaxBatchSize);
-    processedDataBuffer_.reserve(MaxBatchSize);
-  }
+class IDataStream {
+  public:
+  virtual const Bars& getCurrentBars() const = 0;
+  virtual void commitNextBars() = 0;
+  virtual void prepareNextBars() = 0;
+  virtual bool empty() = 0;
+  ~IDataStream() = default;
+};
 
-  const std::vector<Bar>& getCurrentBatch() const { return processedDataBatch_; }
+template <FilePathLiteral Filepath, char Delimiter, size_t BatchSize>
+class DataStream : public IDataStream {
+  public:
+  using FileParser = 
+  std::conditional_t<static_cast<std::string_view>(Filepath.value).ends_with(".csv"), CsvParser, void>;
 
-  void prepareNextBatch() {
-    fillRawDataBuffer();
-    
-    for (const std::string_view line : rawDataBuffer_) {
-      processedDataBuffer_.emplace_back(parser_.processLine(line));
+  DataStream() {
+    if (!fs::exists(static_cast<fs::path>(Filepath.value))) {
+      throw std::runtime_error("File: " + static_cast<fs::path>(Filepath.value).string() + " could not be found.");
     }
+    file_ = std::ifstream{Filepath.value};
+    rawBarsBuffer_.reserve(BatchSize);
+    preparedBarsBuffer_.reserve(BatchSize);
+    currentBarsBuffer_.reserve(BatchSize);
   }
 
-  void commitNextBatch() {
-    processedDataBatch_.clear();
-    processedDataBuffer_.swap(processedDataBatch_);
+  [[nodiscard]] const Bars& getCurrentBars() const override {
+    return currentBarsBuffer_;
   }
 
-  bool empty() const { return file_.eof(); }
+  void prepareNextBars() override {
+    static_assert(!std::same_as<FileParser, void>, "Supported file types: .csv");
 
- private:
-  void fillRawDataBuffer() {
-    rawDataBuffer_.clear();
+    rawBarsBuffer_.clear();
 
-    while (rawDataBuffer_.size() != rawDataBuffer_.capacity() && !file_.eof()) {
-      std::string line;
-      std::getline(file_, line);
-      rawDataBuffer_.emplace_back(std::move(line));
+    std::string line;
+    while (rawBarsBuffer_.size() != rawBarsBuffer_.capacity() && getline(file_, line)) {
+      rawBarsBuffer_.push_back(line);
     }
+
+    preparedBarsBuffer_ = FileParser::linesToBars(rawBarsBuffer_, Delimiter);
   }
 
-  Parser parser_;
-  std::string filename_;
+  void commitNextBars() override {
+    currentBarsBuffer_ = std::move(preparedBarsBuffer_);
+  }
+
+  [[nodiscard]] bool empty() override {
+    return file_.eof();
+  }
+
+  private:
   std::ifstream file_;
-  std::vector<std::string> rawDataBuffer_;
-  std::vector<Bar> processedDataBatch_;
-  std::vector<Bar> processedDataBuffer_;
+
+  std::vector<std::string> rawBarsBuffer_;
+  Bars preparedBarsBuffer_;
+  Bars currentBarsBuffer_;
 };
 } // namespace: lookback
-
-#endif
