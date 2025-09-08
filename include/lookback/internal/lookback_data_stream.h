@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LOOKBACK_LOOKBACK_INCLUDE_INTERNAL_LOOKBACK_DATA_STREAM_H_
+#define LOOKBACK_LOOKBACK_INCLUDE_INTERNAL_LOOKBACK_DATA_STREAM_H_
 
 #include "lookback_data_parser.h"
 #include <algorithm>
@@ -79,3 +80,4 @@ class DataStream : public IDataStream {
   Bars currentBarsBuffer_;
 };
 } // namespace: lookback
+#endif

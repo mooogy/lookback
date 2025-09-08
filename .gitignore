@@ -4,5 +4,5 @@ build
 main.cpp
 data.csv
 .venv
-clean.py
 nasdaq_futures.csv
+gmon.out

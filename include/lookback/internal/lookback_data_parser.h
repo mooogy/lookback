@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LOOKBACK_LOOKBACK_INCLUDE_INTERNAL_LOOKBACK_DATA_PARSER_H_
+#define LOOKBACK_LOOKBACK_INCLUDE_INTERNAL_LOOKBACK_DATA_PARSER_H_
 
 #include <charconv>
 #include <concepts>
@@ -99,3 +100,4 @@ class CsvParser {
   }
 };
 } // namespace: lookback
+#endif

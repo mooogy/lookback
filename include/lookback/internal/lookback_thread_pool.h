@@ -1,5 +1,5 @@
-#ifndef LOOKBACK_INCLUDE_LOOKBACK_THREAD_POOL_H_
-#define LOOKBACK_INCLUDE_LOOKBACK_THREAD_POOL_H_
+#ifndef LOOKBACK_LOOKBACK_INCLUDE_INTERNAL_LOOKBACK_THREAD_POOL_H_
+#define LOOKBACK_LOOKBACK_INCLUDE_INTERNAL_LOOKBACK_THREAD_POOL_H_
 
 #include <condition_variable>
 #include <functional>
@@ -26,7 +26,7 @@ class ThreadPool {
               return !tasks_.empty() || stop_;
             });
            
-            if (stop_ && tasks_.empty()) {
+            if (stop_ && tasks_.empty()) [[unlikely]] {
               return;
             }
            
@@ -67,8 +67,5 @@ class ThreadPool {
   std::condition_variable taskReadySignal_;
   bool stop_ = false;
 };
-
 } // namespace: lookback
-
-
 #endif 

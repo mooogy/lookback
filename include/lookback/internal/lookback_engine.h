@@ -1,15 +1,14 @@
-#pragma once
+#ifndef LOOKBACK_LOOKBACK_INCLUDE_INTERNAL_LOOKBACK_ENGINE_H_
+#define LOOKBACK_LOOKBACK_INCLUDE_INTERNAL_LOOKBACK_ENGINE_H_
 
-#include "lookback/lookback_backtest.h"
-#include "lookback/lookback_data_stream.h"
-#include "lookback/lookback_strategy.h"
-#include "lookback/lookback_thread_pool.h"
-#include <memory>
-#include <latch>
+#include "lookback_backtest.h"
+#include "lookback_data_stream.h"
+#include "lookback_strategy.h"
+#include "lookback_thread_pool.h"
 #include <stdexcept>
-#include <unordered_map>
 #include <string>
-#include <vector>
+#include <latch>
+#include <iostream>
 
 namespace lookback {
 
@@ -27,12 +26,12 @@ class BacktestingEngine {
   }
 
   template <FilePathLiteral Filepath, Strategy Strat>
-  void createBacktest(Strat strategy) {
+  void createBacktest(std::string name, Strat strategy, BacktestSettings config = BacktestSettings{}) {
     if (!dataStreams_.contains(Filepath.value)) 
       throw std::runtime_error("File :" + std::string(Filepath.value) + " was not added to the engine");
 
     backtests_[Filepath.value].push_back(
-      std::make_unique<Backtest<Strat>>(Backtest<Strat>(dataStreams_[Filepath.value], strategy))
+      std::make_unique<Backtest<Strat>>(Backtest<Strat>(name, dataStreams_[Filepath.value], strategy, config))
     );
   }
 
@@ -59,13 +58,24 @@ class BacktestingEngine {
         stream->prepareNextBars();
       }
     }
+    printBacktestReports();
   }
 
  private:
-  unsigned int batchSize_ = 128;
+  void printBacktestReports() const {
+    for (const auto& [k, v] : backtests_) {
+      for (const auto& backtest : v) {
+        std::cout << "REPORT FOR \"" << backtest->getName() << "\"\n";
+        backtest->printStats();
+        std::cout << '\n';
+      }
+    }
+  }
+
   ThreadPool threadPool_;
   std::unordered_map<std::string, std::shared_ptr<IDataStream>> dataStreams_;
   std::unordered_map<std::string, std::vector<std::unique_ptr<IBacktest>>> backtests_;
 };
+} // namespace: lookback
 
-}
+#endif
