@@ -2,10 +2,11 @@
 
 ## Welcome to Lookback
 
-**Lookback** is a lightweight, header-only **C++20 backtesting library** designed for speed and flexibility, utilizing C++20 concepts 
-to ensure type-safe code.
+**Lookback** is a lightweight, header-only **C++20 backtesting library** designed for speed and flexibility, it leverages C++20 concepts 
+to ensure type-safe and robust code.
 
-Lookback takes a modular approach, allowing you to plug in custom trading strategies and run them efficiently on historical datasets.
+Lookback takes a modular approach, allowing you to plug in custom trading strategies and run them efficiently on historical datasets, 
+making it easy to experiment with new ideas and optimize your trading algorithms.
 
 ## Features
 
@@ -26,7 +27,7 @@ int main() {
     // Add datasets like this
     engine.addDataset<"nasdaq_futures.csv">();
 
-    // Create new backtests like this
+    // Create new backtests for your custom strategies like this
     engine.createBacktest<"nasdaq_futures.csv">("SMA50", SMA{50});
     engine.createBacktest<"nasdaq_futures.csv">("SMA100", SMA{100});
 
