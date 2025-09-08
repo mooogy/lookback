@@ -18,10 +18,10 @@ This makes it easy to experiment with new ideas and optimize your trading algori
 ## Example Usage
 
 ```cpp
-int main() {
-    // Single header include
-    #include <lookback/lookback.h>
+// Single header include
+#include <lookback/lookback.h>
 
+int main() {
     auto& engine = lookback::BacktestingEngine::getEngine();
 
     // Add datasets like this
