@@ -28,11 +28,11 @@ int main() {
     engine.addDataset<"nasdaq_futures.csv">();
 
     // Create new backtests for your custom strategies like this
-    engine.createBacktest<"nasdaq_futures.csv">("SMA50", SMA{50});
-    engine.createBacktest<"nasdaq_futures.csv">("SMA100", SMA{100});
+    engine.createBacktest<"nasdaq_futures.csv">("SMA50", YourSMA{50});
+    engine.createBacktest<"nasdaq_futures.csv">("SMA100", YourSMA{100});
 
     // Adjusts initial balance, commission rate, and slippage rate using a config object
-    engine.createBacktest<"nasdaq_futures.csv">("SMA200", SMA{200}, {100'000, 0, 0});
+    engine.createBacktest<"nasdaq_futures.csv">("SMA200", YourSMA{200}, {100'000, 0, 0});
 
     // Run all your backtests and have the results printed
     engine.run();
