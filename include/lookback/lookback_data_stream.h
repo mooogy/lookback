@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lookback_data_parser.h"
+#include <algorithm>
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
@@ -50,7 +51,7 @@ class DataStream : public IDataStream {
   }
 
   void prepareNextBars() override {
-    static_assert(!std::same_as<FileParser, void>, "Supported file types: .csv");
+    static_assert(!std::same_as<FileParser, void>, "Currently supported file types: .csv");
 
     rawBarsBuffer_.clear();
 

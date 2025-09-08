@@ -21,7 +21,6 @@ class Backtest : public IBacktest {
   : dataStream_(dataStream), strategy_(strategy) {}
   void runBatch() {
     auto order = strategy_.processBar(Bar{});
-    std::cout << "PROCESSED A BATCH IN THREAD: " << std::this_thread::get_id() << '\n';
   }
 
  private:

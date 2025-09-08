@@ -37,13 +37,8 @@ class BacktestingEngine {
   }
 
   void run() {
-
-    std::cout << "HANDLING " << dataStreams_.size() << " DATASTREAMS\n";
-
     for (const auto& [filename, stream] : dataStreams_) {
-      std::cout << "PROCESSING " << filename << '\n';
       auto& associatedBacktests = backtests_[filename];
-      std::cout << "MUST WAIT FOR " << associatedBacktests.size() << " STRATEGIES TO PROCESS A BATCH\n";
       int batches = 0;
       stream->prepareNextBars();
 
@@ -63,8 +58,6 @@ class BacktestingEngine {
         batch_done.wait();
         stream->prepareNextBars();
       }
-
-      std::cout << associatedBacktests.size() << " STRATEGIES PROCESSED " << batches << " BATCHES\n";
     }
   }
 
