@@ -11,8 +11,8 @@ This makes it easy to experiment with new ideas and optimize your trading algori
 ## Features
 
 - **Strategy-first design**: Write and backtest custom trading strategies with a simple interface.
-- **Batch processing**: Efficient double buffer-based design for multi-threaded processing.
-- **Compile-time safety**: Concepts enforce correct strategy and parser creation.
+- **Batch processing**: Efficient double buffer-based design for multi-threaded batch processing.
+- **Compile-time safety**: Concepts guide compatible custom strategy and parser creation.
 - **Backtest engine**: Manage datasets and run multiple strategies on the same data.
 
 ## Example Usage
