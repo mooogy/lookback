@@ -2,7 +2,7 @@
 
 ## Welcome to Lookback
 
-**Lookback** is a lightweight, header-only **C++20 backtesting library** designed for speed and flexibility, it leverages C++20 concepts 
+**Lookback** is a lightweight, header-only **C++20 backtesting library** designed for speed and flexibility. It leverages C++20 concepts 
 to ensure type-safe and robust code.
 
 Lookback takes a modular approach, allowing you to plug in custom trading strategies and run them efficiently on historical datasets, 
