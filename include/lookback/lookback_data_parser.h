@@ -1,15 +1,12 @@
 #pragma once
 
-#include <algorithm>
 #include <charconv>
 #include <concepts>
-#include <iterator>
 #include <optional>
 #include <stdexcept>
 #include <string_view>
 #include <vector>
 #include <string>
-#include <iostream>
 
 namespace lookback {
 using Date = std::string;
@@ -47,22 +44,19 @@ class CsvParser {
   [[nodiscard]] static Bars linesToBars(const std::vector<std::string>& lines, const char delimiter) {
     Bars processedBars;
     processedBars.reserve(lines.size());
-    std::transform(lines.begin(), lines.end(), std::back_inserter(processedBars),
-                  [delimiter](const std::string& line){ return CsvParser::processLine(line, delimiter); });
+    for (const auto& line : lines) {
+        processedBars.push_back(CsvParser::processLine(line, delimiter));
+    }
     return processedBars;
   }
 
  private:
   [[nodiscard]] static Bar processLine(std::string_view line, const char delimiter) {
-    if (!line.empty() && (unsigned char)line[0] == 0xEF) {
-      line.remove_prefix(3); // skip UTF-8 BOM
-    }
-
     std::string_view cols[Bar::ENUM_LENGTH];
-    unsigned int start = 0;
-    unsigned int colIndex = 0;
+    size_t start = 0;
+    size_t colIndex = 0;
 
-    for (unsigned int i = 0; i <= line.size(); ++i) {
+    for (size_t i = 0; i <= line.size(); ++i) {
       if (i == line.size() || line[i] == delimiter) {
         if (colIndex >= Bar::ENUM_LENGTH) break;
 
@@ -80,14 +74,14 @@ class CsvParser {
       const auto volume = convert<Volume>(cols[Bar::VOLUME]);
 
       if (open && high && low && close && volume) {
-        return {
+        return Bar(
           std::string(cols[Bar::DATE]),
           *open,
           *high,
           *low,
           *close,
           *volume
-        };
+        );
       }
 
     }

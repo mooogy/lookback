@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lookback_data_parser.h"
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
